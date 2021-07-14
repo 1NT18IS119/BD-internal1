@@ -1,0 +1,57 @@
+// Demonstrate usage of $match, $group and aggregate pipelines
+db.data.aggregate(
+    [
+        {
+            $match: { Pass: "TRUE" }
+        },
+        {
+            $group: { _id: "$USN" }
+        }
+    ]
+);
+
+// Demonstrate Map-reduce aggregate function
+var mapper = function () {
+    emit(this.USN, this.Subject3)
+};
+
+var reducer = function (USN, Subject3) {
+    return Array.avg(Subject3)
+};
+
+db.data.mapReduce(mapper, reducer, {
+    out: "output"
+});
+db.output.find()
+
+// Count no. of students who passed at least 2 subjects
+db.data.aggregate(
+    [
+        {
+            $match: {
+                $and: [
+                    { Subject1: { $gt: 35 } },
+                    { Subject2: { $gt: 35 } }
+                ]
+            }
+        },
+        {
+            $count: "passed"
+        }
+    ]
+);
+
+// Demonstrate Alter/update and drop commands
+db.data.update(
+    {
+        USN: 1
+    },
+    {
+        $set: {
+            Name: "Ujwal",
+            Subject2: 80
+        }
+    }
+);
+
+db.output.drop();
